@@ -1,34 +1,25 @@
 pipeline {
     agent any
     
-    environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-        AWS_REGION = 'your-aws-region'
-        EC2_INSTANCE = 'your-ec2-instance-id'
-    }
-    
     stages {
-        stage('Clone') {
+        stage('Build') {
             steps {
-                git 'https://github.com/your-repo.git'
+                // Perform the build steps here
+                sh 'your-build-command'
             }
         }
         
-        stage('Build') {
+        stage('Test') {
             steps {
-                sh 'your-build-commands'
+                // Perform the test steps here
+                sh 'your-test-command'
             }
         }
         
         stage('Deploy') {
             steps {
-                withAWS(credentials: 'aws-credentials') {
-                    sh '''
-                        aws ec2 describe-instances --instance-ids $EC2_INSTANCE --region $AWS_REGION
-                        # Additional deployment commands here
-                    '''
-                }
+                // Perform the deployment steps here
+                sh 'your-deploy-command'
             }
         }
     }
