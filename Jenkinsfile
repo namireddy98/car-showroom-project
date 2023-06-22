@@ -1,16 +1,35 @@
 pipeline {
-   agent any
-   stages {
-      stage('clone repo') {
-          steps {
-              withCredentials(usernamePassword(credentialsId :jenkins-user-github ,passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME' )){
-              // Get some code from a GitHub repository
-              bat("""
-              git config --global credential.username {GIT_USERNAME}
-              git config --global credential.helper "!echo password={GIT_PASSWORD}; echo"
-              git clone https://github.com/aakashsehgal/FMU.git
-
-              echo "pulled the code"
-              """)
-
-          }
+    agent any
+    
+    environment {
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        AWS_REGION = 'your-aws-region'
+        EC2_INSTANCE = 'your-ec2-instance-id'
+    }
+    
+    stages {
+        stage('Clone') {
+            steps {
+                git 'https://github.com/your-repo.git'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                sh 'your-build-commands'
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                withAWS(credentials: 'aws-credentials') {
+                    sh '''
+                        aws ec2 describe-instances --instance-ids $EC2_INSTANCE --region $AWS_REGION
+                        # Additional deployment commands here
+                    '''
+                }
+            }
+        }
+    }
+}
